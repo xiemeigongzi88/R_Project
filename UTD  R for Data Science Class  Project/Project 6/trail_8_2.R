@@ -1,0 +1,106 @@
+# trial_8_2
+library(tidytext)
+library(tm)
+library(SnowballC)
+library(SparkR)
+library(tidyverse)
+
+nrow(plot_summaries)
+data<-plot_summaries
+#View(data)
+n<-100
+
+text<-data$V2[1:100]
+rowIndex<-c(1:n)
+docRelated<-data$V1[1:100]
+
+data<-data.frame("rowIndex"=rowIndex,"text"=text,"docRelated"=docRelated)
+
+docList<-as.list(text)
+N.docs<-length(docList)
+
+######---------------------------------------------------------
+
+# store docs in Corpus class which is a fundamental data structure in text mining
+my.docs <- VectorSource(c(docList))
+
+
+# Transform/standaridze docs to get ready for analysis
+my.corpus <- VCorpus(my.docs) %>% 
+  tm_map(stemDocument) %>%
+  tm_map(removeNumbers) %>% 
+  tm_map(content_transformer(tolower)) %>% 
+  tm_map(removeWords,stopwords("en")) %>%
+  tm_map(stripWhitespace)
+
+
+# Store docs into a term document matrix where rows=terms and cols=docs
+# Normalize term counts by applying TDiDF weightings
+'''
+data.doc.matrix.stm <- TermDocumentMatrix(my.corpus,
+                                          control=list(
+                                            weighting=function(x) weightSMART(x,spec="ltc"),
+                                            wordLengths=c(1,Inf)))
+'''
+'''
+> data.doc.matrix.stm[["nrow"]]
+[1] 13254
+
+> data.doc.matrix.stm[["ncol"]]
+[1] 100
+'''
+
+queryTerm<-"active"
+query_doc<-VectorSource(c(queryTerm))
+
+query_corpus<-VCorpus(query_doc) %>% 
+  tm_map(stemDocument) %>%
+  tm_map(removeNumbers) %>% 
+  tm_map(content_transformer(tolower)) %>% 
+  tm_map(removeWords,stopwords("en")) %>%
+  tm_map(stripWhitespace)
+
+'''
+query.doc.matrix.stm <- TermDocumentMatrix(query_corpus,
+                                           control=list(
+                                             weighting=function(x) weightSMART(x,spec="ltc"),
+                                             wordLengths=c(1,Inf)))
+
+View(query.doc.matrix.stm)
+'''
+
+
+term.doc.matrix.stm<-c(TermDocumentMatrix(my.corpus), TermDocumentMatrix(query_corpus))
+
+term.doc.matrix <- tidy(term.doc.matrix.stm) %>% 
+  group_by(document) %>% 
+  mutate(vtrLen=sqrt(sum(count^2))) %>% 
+  mutate(count=count/vtrLen) %>% 
+  ungroup() %>% 
+  select(term:count)
+docMatrix <- term.doc.matrix %>% 
+  mutate(document=as.numeric(document)) %>% 
+  filter(document<N.docs)
+qryMatrix <- term.doc.matrix %>% 
+  mutate(document=as.numeric(document)) %>% 
+  filter(document>=N.docs)
+
+
+# Calcualte top ten results by cosine similarity
+searchRes <- docMatrix %>% 
+  inner_join(qryMatrix,by=c("term"="term"),
+             suffix=c(".doc",".query")) %>% 
+  mutate(termScore=round(count.doc*count.query,4)) %>% 
+  group_by(document.query,document.doc) %>% 
+  summarise(Score=sum(termScore)) %>% 
+  filter(row_number(desc(Score))<=10) %>% 
+  arrange(desc(Score)) %>% 
+  left_join(data,by=c("document.doc"="rowIndex")) %>% 
+  ungroup() %>% 
+  rename(Result=text) %>% 
+  select(Score,docRelated) %>% 
+  data.frame()
+
+searchRes
+
+
