@@ -1,0 +1,29 @@
+Introduction to Probability
+and Statistics Using R
+G. Jay Kerns
+First Edition
+
+
+11. simple linear regression
+12. Multiple linear regression 
+
+
+ISLR 
+3. Linear regression 
+
+
+Data Analysis 
+4. Regression Analysis 
+ 
+ 
+R in action 
+8 Regression 
+
+R cookbook 
+11. Linear Regression 
+
+
+
+Simple R 
+
+page 77 
