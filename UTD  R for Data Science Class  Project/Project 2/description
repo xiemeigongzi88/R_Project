@@ -1,0 +1,18 @@
+1. You have to identify a text classification problem and dataset
+from UCI text datasets
+You are responsible for splitting the data into two parts: train and
+test
+2. You have to preprocess the data. It involves removing stop
+words, converting words to vectors, choosing how many words
+you would like to use and finally make the data suitable for
+being used as an input layer.
+Hint: It’s totally upto you how you do this. A good resource is the
+tm package in R
+
+3. Create a deep network using Keras package. It’s upto you to
+design this. Remember to design the output layer based on the
+data features.
+4. You need to run your code on Google Cloud with GPU
+enabled. We had given you an introduction in class. You
+will need to figure out the details - such as how to
+transfer to cloud and refer to them in your code
