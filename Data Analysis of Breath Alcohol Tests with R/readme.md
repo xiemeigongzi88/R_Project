@@ -12,3 +12,7 @@
   Breathalyzer tests by month
   Finding a pattern of breathalyzer tests 
   Visualizing the timelines 
+
+## Conclusion: 
+
+  I just got the fun from the hidden insights of data. And this project was inspired by the project “Who Is Drunk and When in Ames, Iowa?”, https://www.datacamp.com/projects/208
